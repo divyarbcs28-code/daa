@@ -1,0 +1,60 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+int x[20]; // Array to store queen positions (x[row] = column)
+int solution_count = 0;
+
+// The "place" function based on your logic
+bool place(int k, int i) {
+    for (int j = 1; j <= k - 1; j++) {
+        // x[j] == i checks for the same column
+        // abs(x[j] - i) == abs(j - k) checks for diagonals
+        if ((x[j] == i) || (abs(x[j] - i) == abs(j - k))) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// The "nqueens" function based on your logic
+void nqueens(int k, int n) {
+    for (int i = 1; i <= n; i++) {
+        if (place(k, i)) {
+            x[k] = i; // Place queen k in column i
+            if (k == n) {
+                // If k equals n, we found a full solution
+                solution_count++;
+                printf("Solution %d: [", solution_count);
+                for (int m = 1; m <= n; m++) {
+                    printf("%d%s", x[m], (m == n ? "" : ", "));
+                }
+                printf("]\n");
+            } else {
+                // Otherwise, move to the next queen
+                nqueens(k + 1, n);
+            }
+        }
+    }
+}
+
+int main() {
+    int n;
+    printf("Enter Chess board size for nxn : ");
+    scanf("%d", &n);
+
+    if (n < 1 || n > 20) {
+        printf("Please enter a valid number between 1 and 20.\n");
+        return 1;
+    }
+    nqueens(1, n);
+
+    if (solution_count == 0) {
+        printf("No solutions exist for size %d.\n", n);
+    } else {
+        printf("\nTotal solutions found: %d\n", solution_count);
+    }
+
+    return 0;
+}
+
