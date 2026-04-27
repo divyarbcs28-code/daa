@@ -1,0 +1,95 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_TREE_HT 100
+
+struct MinHeapNode {
+    char data;
+    unsigned freq;
+    struct MinHeapNode *left, *right;
+};
+
+int total_bits = 0;
+
+struct MinHeapNode* newNode(char data, unsigned freq) {
+    struct MinHeapNode* temp = (struct MinHeapNode*)malloc(sizeof(struct MinHeapNode));
+    temp->left = temp->right = NULL;
+    temp->data = data;
+    temp->freq = freq;
+    return temp;
+}
+
+void printCodesAndSum(struct MinHeapNode* root, int arr[], int top) {
+    int i; // Fixed: Declaration outside loop for older C standards
+    if (root->left) {
+        arr[top] = 0;
+        printCodesAndSum(root->left, arr, top + 1);
+    }
+    if (root->right) {
+        arr[top] = 1;
+        printCodesAndSum(root->right, arr, top + 1);
+    }
+    if (!(root->left) && !(root->right)) {
+        printf("%c: ", root->data);
+        for (i = 0; i < top; ++i) printf("%d", arr[i]);
+        printf("\n");
+        total_bits += (root->freq * top);
+    }
+}
+
+int main() {
+    int size, i, j, original_bits = 0;
+    int arr[MAX_TREE_HT];
+
+    printf("Enter number of characters: ");
+    if (scanf("%d", &size) != 1) return 1;
+
+    struct MinHeapNode* nodes[MAX_TREE_HT];
+
+    for (i = 0; i < size; i++) {
+        char data;
+        int freq;
+        printf("Enter char and freq: ");
+        scanf(" %c %d", &data, &freq);
+        nodes[i] = newNode(data, freq);
+        original_bits += (freq * 8);
+    }
+
+    int currSize = size;
+    while (currSize > 1) {
+        for (i = 0; i < currSize - 1; i++) {
+            for (j = 0; j < currSize - i - 1; j++) {
+                if (nodes[j]->freq > nodes[j + 1]->freq) {
+                    struct MinHeapNode* temp = nodes[j];
+                    nodes[j] = nodes[j + 1];
+                    nodes[j + 1] = temp;
+                }
+            }
+        }
+
+        struct MinHeapNode *l = nodes[0];
+        struct MinHeapNode *r = nodes[1];
+
+        struct MinHeapNode *top = newNode('$', l->freq + r->freq);
+        top->left = l;
+        top->right = r;
+
+        nodes[0] = top;
+        for (i = 1; i < currSize - 1; i++) {
+            nodes[i] = nodes[i + 1];
+        }
+        currSize--;
+    }
+
+    printf("\nHuffman Codes:\n");
+    printCodesAndSum(nodes[0], arr, 0);
+
+    if (total_bits > 0) {
+        printf("\nCompression Ratio: %.2f\n", (float)original_bits / total_bits);
+    } else {
+        // Fixed: Removed the stray backslash that caused the warning
+        printf("\nCompression Ratio: N/A (Single character or 0 frequency)\n");
+    }
+
+    return 0;
+}
